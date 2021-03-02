@@ -1,4 +1,4 @@
 # flash_card
 
 
-to be upadted
+to be updated
