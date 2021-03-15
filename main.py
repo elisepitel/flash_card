@@ -1,4 +1,4 @@
-from tkinter import *
+rom tkinter import *
 import pandas
 import random
 
@@ -10,25 +10,39 @@ VOC_FONT = ('Ariel', 60, 'bold')
 
 # --- READ DATA --- #
 data = pandas.read_csv('data/russian_words.csv')
+to_learn = data.to_dict(orient='records')
+current_card = {}
 
-english_voc = data['English'].to_list()
 
-
-# --- DISPLAY RANDOM VOC --- #
-russian_voc = data['Russian'].to_list()
+# --- FLIP CARD --- #
+def delay():
+    window.after(3000, flip_card)
 
 
 def random_voc():
-    random_voc = random.randint(0, len(russian_voc))
-    russian_word = russian_voc[random_voc]
-    canvas.itemconfig(voc_text, text=russian_word)
-    #flip_card()
-    
-    
+    global current_card, timer
+    window.after_cancel(timer)
+    current_card = random.choice(to_learn)
+    canvas.itemconfig(language_text, fill='black', text='Russian')
+    canvas.itemconfig(voc_text, fill='black', text=current_card["Russian"])
+    canvas.itemconfig(canvas_image, image=front_card_img)
+    timer = window.after(3000, flip_card)
+
+
+def flip_card():
+    global current_card
+    canvas.itemconfig(language_text, fill='white', text='English')
+    canvas.itemconfig(voc_text, fill='white', text=current_card["English"])
+    canvas.itemconfig(canvas_image, image=back_card_img)
+
+
 # --- UI SETUP --- #
 window = Tk()
 window.title('Flash Card')
 window.config(height=800, width=1000, padx=50, pady=50, bg=BACKGROUND_COLOR)
+
+
+timer = window.after(3000, flip_card)
 
 # Card Image
 canvas = Canvas(width=800, height=526, bg=BACKGROUND_COLOR, highlightthickness=0)
@@ -38,9 +52,10 @@ back_card_img = PhotoImage(file='images/card_back.png')
 canvas_image = canvas.create_image(400, 263, image=front_card_img)
 canvas.grid(column=0, row=0, columnspan=2)
 
+
 # Card Text
-language_text = canvas.create_text(370, 110, font=LANGUAGE_FONT, text='Language')
-voc_text = canvas.create_text(380, 260, font=VOC_FONT, text='Voc')
+language_text = canvas.create_text(370, 110, font=LANGUAGE_FONT, text='Russian')
+voc_text = canvas.create_text(380, 260, font=VOC_FONT, text='')
 
 
 # Button
@@ -53,5 +68,7 @@ wrong_button = Button(image=wrong_button_img, highlightthickness=0, command=rand
 right_button.grid(column=0, row=1)
 wrong_button.grid(column=1, row=1)
 
+
+random_voc()
 
 window.mainloop()
