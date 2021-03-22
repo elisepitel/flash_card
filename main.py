@@ -1,6 +1,7 @@
-rom tkinter import *
+from tkinter import *
 import pandas
 import random
+
 
 # --- CONSTANTS --- #
 BACKGROUND_COLOR = "#B1DDC6"
@@ -9,8 +10,14 @@ VOC_FONT = ('Ariel', 60, 'bold')
 
 
 # --- READ DATA --- #
-data = pandas.read_csv('data/russian_words.csv')
-to_learn = data.to_dict(orient='records')
+try:
+    data = pandas.read_csv('data/words_to_learn.csv')
+except FileNotFoundError:
+    original_data = pandas.read_csv('data/russian_words.csv')
+    to_learn = original_data.to_dict(orient='records')
+else:
+    to_learn = data.to_dict(orient='records')
+
 current_card = {}
 
 
@@ -34,6 +41,15 @@ def flip_card():
     canvas.itemconfig(language_text, fill='white', text='English')
     canvas.itemconfig(voc_text, fill='white', text=current_card["English"])
     canvas.itemconfig(canvas_image, image=back_card_img)
+
+
+def is_known():
+    to_learn.remove(current_card)
+    print(len(to_learn))
+    data = pandas.DataFrame(to_learn)
+    data.to_csv("data/words_to_learn.csv", index=False)
+
+    random_voc()
 
 
 # --- UI SETUP --- #
@@ -62,7 +78,7 @@ voc_text = canvas.create_text(380, 260, font=VOC_FONT, text='')
 right_button_img = PhotoImage(file='images/right.png')
 wrong_button_img = PhotoImage(file='images/wrong.png')
 
-right_button = Button(image=right_button_img, highlightthickness=0, command=random_voc)
+right_button = Button(image=right_button_img, highlightthickness=0, command=is_known)
 wrong_button = Button(image=wrong_button_img, highlightthickness=0, command=random_voc)
 
 right_button.grid(column=0, row=1)
@@ -70,5 +86,6 @@ wrong_button.grid(column=1, row=1)
 
 
 random_voc()
+
 
 window.mainloop()
